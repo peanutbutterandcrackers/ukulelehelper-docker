@@ -1,13 +1,19 @@
 FROM alpine:latest
 
-ARG targetURL=https://ukulelehelper.com
+# Build-time variables
+# This will aid in generalizing the Dockerfile
+ARG URL=https://ukulelehelper.com
 ARG port=8000
 
 RUN apk add wget
 RUN apk add mini_httpd
-RUN wget --recursive --no-parent $targetURL
+RUN wget --recursive --no-parent $URL
 
 EXPOSE $port/tcp
 
-# Need to figure out a correct way to use variables here
-CMD mini_httpd -D -p 8000 -d ukulelehelper.com
+# Setting build-time vars to env. vars
+# so as to make them available to CMD
+ENV URL=${URL}
+ENV port=${port}
+
+CMD mini_httpd -D -p $port -d $(basename $URL)
