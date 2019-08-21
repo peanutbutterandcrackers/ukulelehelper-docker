@@ -1,25 +1,30 @@
 #!/bin/bash -i
-########################
-# -i (interactive) mode because bash scripts, apparently,
-# don't have access to shell functions or aliases; and it
-# is necessary to check for the existance of one so as to
-# not clutter up the .bashrc file on multipe executions.
 
+image_name=ukehelper
+container_name=uke_helper
 container_port=8000
 host_port=80
+exported_command_name=ukehelp # shell-function to start/stop the container
 
-docker build --tag ukehelper .
-docker run --detach --name uke_helper --publish $host_port:$container_port ukehelper
+docker build --tag $image_name .
+docker run --detach --name $container_name \
+		--publish $host_port:$container_port $image_name
 
-# If the shell function that we add to .bashrc already exists, don't do anything
-command -v ukehelp || {
+
+# The following adds a shell-function with the name $exported_command_name to
+# ~/.bashrc, with a logical check to verify that the command does not already
+# exist: to prevent ~/.bashrc from being cluttered by the same function defn.
+# multiple times.
+# It is because of the check that this script is running in -i (interactive)
+# mode: aliases and shell functions aren't available to the script otherwise
+command -v $exported_command_name || {
 cat << _EOF_
 
-function ukehelp {
+function $exported_command_name {
 	if [ "\$1" == 'stop' ]; then
-		docker stop uke_helper
+		docker stop $container_name
 	else
-		docker start uke_helper
+		docker start $container_name
 	fi
 }
 _EOF_
