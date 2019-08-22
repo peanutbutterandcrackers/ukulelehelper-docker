@@ -5,8 +5,7 @@ FROM alpine:latest
 ARG URL=https://ukulelehelper.com
 ARG port=8000
 
-RUN apk add wget
-RUN apk add mini_httpd
+RUN apk add wget mini_httpd
 RUN wget --recursive --no-parent $URL
 
 EXPOSE $port/tcp
