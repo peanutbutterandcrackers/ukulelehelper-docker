@@ -1,4 +1,5 @@
 #!/bin/bash -i
+set -o errexit # exit if any command exits with a non-zero status
 
 # The URL to download and host inside the container
 URL="https://ukulelehelper.com/"
