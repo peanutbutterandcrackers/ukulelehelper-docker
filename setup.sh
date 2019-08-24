@@ -14,7 +14,7 @@ exported_command_name=ukehelp # shell-function to start/stop the container
 
 docker build --tag $image_name \
 		--build-arg URL=$URL --build-arg port=$port .
-docker run --detach --name $container_name \
+docker create --name $container_name \
 		--publish $host_port:$container_port $image_name
 
 # The following adds a shell-function with the name $exported_command_name to
@@ -27,11 +27,21 @@ command -v $exported_command_name || {
 cat << _EOF_
 
 function $exported_command_name {
+
+	# ASCII COLOR CODES
+	LIGHT_CYAN='\033[1;36m'
+	NC='\033[0m'
+
+	MESSAGE="Please navigate to '\${LIGHT_CYAN}localhost:$host_port\${NC}' in your web-browser."
+
 	if [ "\$1" == 'stop' ]; then
 		docker stop $container_name
 	else
-		docker start $container_name
+		docker start $container_name && echo -e \${MESSAGE}
 	fi
 }
 _EOF_
 } >> ~/.bashrc
+
+source ~/.bashrc
+$exported_command_name
