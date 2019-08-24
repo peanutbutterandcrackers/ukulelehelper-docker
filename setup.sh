@@ -1,15 +1,21 @@
 #!/bin/bash -i
 
+# The URL to download and host inside the container
+URL="https://ukulelehelper.com/"
+# The port to publish the URL in, in the container
+port=8000
+
+host_port=80 # host-machine port to map to the container port
+container_port=$port
+
 image_name=ukehelper
 container_name=uke_helper
-container_port=8000
-host_port=80
 exported_command_name=ukehelp # shell-function to start/stop the container
 
-docker build --tag $image_name .
+docker build --tag $image_name \
+		--build-arg URL=$URL --build-arg port=$port .
 docker run --detach --name $container_name \
 		--publish $host_port:$container_port $image_name
-
 
 # The following adds a shell-function with the name $exported_command_name to
 # ~/.bashrc, with a logical check to verify that the command does not already
