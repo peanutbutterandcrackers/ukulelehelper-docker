@@ -17,7 +17,7 @@ exported_command_name=ukehelp # shell-function to start/stop the container
 eval docker build ${image_name:+"--tag $image_name"} --build-arg URL=$URL --build-arg port=$port .
 IMAGE_ID=$(docker images --quiet | head --lines 1)
 # host-port is auto-selected by docker daemon during container restart if it is unspecified ('')
-docker create --name ${container_name:-''} --publish ${host_port:-''}:$container_port $IMAGE_ID
+docker create --name ${container_name:-''} --publish ${host_port:-''}:$container_port ${image_name:-$IMAGE_ID}
 CONTAINER_ID=$(docker ps --latest --quiet)
 
 # Figure out docker-daemon-set stuffs
