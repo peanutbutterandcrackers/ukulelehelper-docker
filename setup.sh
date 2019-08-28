@@ -24,14 +24,32 @@ CONTAINER_ID=$(docker ps --latest --quiet)
 container_name=${container_name:-$(basename $(docker inspect $CONTAINER_ID --format {{.Name}}))}
 
 # The following adds a shell-function with the name $exported_command_name to
-# ~/.bashrc, with a logical check to verify that the command does not already
-# exist: to prevent ~/.bashrc from being cluttered by the same function defn.
-# multiple times.
-# It is because of the check that this script is running in -i (interactive)
-# mode: aliases and shell functions aren't available to the script otherwise
-command -v $exported_command_name || {
-cat << _EOF_
+# a startup file (~/.bashrc). If the command does already exist, it uses sed
+# to replace it with a newer version of the function.
+# It is because of the check for the command's pre-existance that this script
+# is running in -i (interactive) mode: aliases and shell functions aren't av-
+# ailable to the script otherwise
 
+STARTUP_FILE=~/.bashrc
+
+function remove_preexisting_function {
+	# Syntax explanation for the (ugly) regex
+	# /starting_regex/{:storeintothisVar;N; # take next line into the buffer
+	# /end_regex/!bstoreintothisVar # go back to starting block stored in var
+	# /regex pattern to match inside the block/d' # 'd' deletes the matching block
+	# The regex is further uglified by the usage of '' and "" (because parameter
+	# expansions do not happen inside single quotes
+	sed --in-place=.bak \
+	'/function'" $exported_command_name {"'/{:a;N;
+	/\n}$/!ba};
+	/function '"$exported_command_name"'/d' $1
+}
+
+command_already_exists=$(command -v $exported_command_name || echo "false")
+[[ "$command_already_exists" != "false" ]] && remove_preexisting_function $STARTUP_FILE
+
+{
+cat << _EOF_
 function $exported_command_name {
 
 	# ASCII COLOR CODES
@@ -49,7 +67,7 @@ function $exported_command_name {
 	fi
 }
 _EOF_
-} >> ~/.bashrc
+} >> $STARTUP_FILE
 
 set +o errexit # for some reason, with errexit set, source was not working
 source ~/.bashrc
