@@ -1,13 +1,17 @@
 FROM alpine:latest
 
+RUN apk add wget mini_httpd
+
+RUN adduser -D foo
+USER foo
+WORKDIR /home/foo
+
 # Build-time variables
 # This will aid in generalizing the Dockerfile
 ARG URL=https://ukulelehelper.com
 ARG port=8000
 
-RUN apk add wget mini_httpd
 RUN wget --recursive --no-parent $URL
-
 EXPOSE $port/tcp
 
 # Setting build-time vars to env. vars
