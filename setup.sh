@@ -13,15 +13,18 @@ image_name=ukehelper
 container_name=uke_helper
 exported_command_name=ukehelp # shell-function to start/stop the container
 
+TEMP_FILE=$(mktemp /tmp/whale_whale_whale.$$.XXXXXXXXXXXX)
+
 # eval: because it wasn't working without it
-eval docker build ${image_name:+"--tag $image_name"} --build-arg URL=$URL --build-arg port=$port .
-IMAGE_ID=$(docker images --quiet | head --lines 1)
+eval docker build ${image_name:+"--tag $image_name"} --build-arg URL=$URL --build-arg port=$port . | tee $TEMP_FILE
 # host-port is auto-selected by docker daemon during container restart if it is unspecified ('')
-docker create --name ${container_name:-''} --publish ${host_port:-''}:$container_port ${image_name:-$IMAGE_ID}
-CONTAINER_ID=$(docker ps --latest --quiet)
+docker create --name ${container_name:-''} --publish ${host_port:-''}:$container_port ${image_name:-$IMAGE_ID} | tee --append $TEMP_FILE
 
 # Figure out docker-daemon-set stuffs
+IMAGE_ID=$(grep 'Successfully built \([[:alnum:]]\{12\}$\)' $TEMP_FILE | grep -o '\([[:alnum:]]\{12\}$\)')
+CONTAINER_ID=$(grep '\(^[[:alnum:]]\{12,\}$\)' $TEMP_FILE)
 container_name=${container_name:-$(basename $(docker inspect $CONTAINER_ID --format {{.Name}}))}
+rm $TEMP_FILE
 
 # The following adds a shell-function with the name $exported_command_name to
 # a startup file (~/.bashrc). If the command does already exist, it uses sed
