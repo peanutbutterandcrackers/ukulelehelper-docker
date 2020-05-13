@@ -51,6 +51,7 @@ command_already_exists=$(command -v $EXPORTED_COMMAND_NAME || echo "false")
 
 {
 cat << _EOF_
+
 function $EXPORTED_COMMAND_NAME {
 
 	# ASCII COLOR CODES
