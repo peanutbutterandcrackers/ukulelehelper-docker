@@ -6,7 +6,7 @@ CONTAINER_PORT=8000 # The port to publish the URL in, inside the container; REQU
 EXPORTED_COMMAND_NAME=ukehelp # shell-function to start/stop the container. REQUIRED!!!
 IMAGE_NAME=ukehelper # Optional, but better if set to something.
 CONTAINER_NAME=uke_helper # Entirely Optional
-HOST_PORT=80 # host-machine port to map to the container port. Entirely Optional. Somewhat better if unset.
+HOST_PORT= # host-machine port to map to the container port. Entirely Optional. Somewhat better if unset.
 
 # The temp file is used to properly figure out docker-daemon-set parameters like image/container id, etc. from
 # the stdoutput (piped to the tempfile using `tee`) of the `docker build` and `docker create` commands. This
